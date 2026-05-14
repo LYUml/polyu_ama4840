@@ -1,0 +1,856 @@
+\documentclass[8pt, landscape, a4paper]{extarticle}
+\usepackage[margin=0.15in]{geometry}
+\usepackage{multicol}
+\usepackage{amsmath, amssymb}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{lmodern} 
+\usepackage{tikz}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\columnsep}{0.15in}
+\setlength{\columnseprule}{0.2pt}
+
+\setlength{\abovedisplayskip}{1pt}
+\setlength{\belowdisplayskip}{1pt}
+\setlength{\abovedisplayshortskip}{0pt}
+\setlength{\belowdisplayshortskip}{0pt}
+
+\titleformat{\section}{\normalsize\bfseries\uppercase}{}{0em}{}[\titlerule]
+\titlespacing{\section}{0pt}{2pt}{1pt}
+\titleformat{\subsection}{\scriptsize\bfseries}{}{0em}{}
+\titlespacing{\subsection}{0pt}{2pt}{0pt}
+\setlist{nosep, leftmargin=1em}
+
+\begin{document}
+\scriptsize 
+\raggedright 
+\begin{multicols*}{4}
+
+\section*{Topic 1: Prob \& Bayes}
+
+\subsection*{1. Basic Probability}
+Total Prob: $P(A) = \sum_i P(A|B_i)P(B_i)$ \\
+Cond Prob: $P(A|B) = \frac{P(A \cap B)}{P(B)}$ \\
+Indep: $P(A \cap B) = P(A)P(B) \Leftrightarrow P(A|B) = P(A)$
+
+\subsection*{2. Distributions \& Math Core}
+\textbf{Binomial (Discrete):} $X \sim B(n, p)$ \\
+$P(X=r) = C_n^r p^r (1-p)^{n-r}$ \\
+\textbf{Poisson (Discrete):} $X \sim \text{Poi}(\lambda)$ \\
+$P(X=x) = \frac{e^{-\lambda} \lambda^x}{x!} \quad \text{Total: } \sum\nolimits_{x=0}^{\infty} \frac{\lambda^x}{x!} = e^\lambda$ \\
+\textbf{Poisson CDF (Sum to $k$):} $P(X \le k) = \sum\nolimits_{x=0}^{k} \frac{e^{-\lambda} \lambda^x}{x!}$ \\
+\textbf{Poisson-Gamma Integral Link (Shortcut):} \\
+\textit{(Used to bypass integrating $\lambda$ in Bayesian posterior)} \\
+$\int_0^c \frac{\lambda^n e^{-\lambda}}{n!} d\lambda = 1 - \sum\nolimits_{x=0}^n \frac{c^x e^{-c}}{x!} = 1 - P(Y \le n \mid \lambda=c)$ \\
+\textbf{General Form (for $\lambda$ from $0$ to $c$):} \\
+$\int_0^c \lambda^n e^{-a\lambda} d\lambda = \frac{n!}{a^{n+1}} \left[ 1 - \sum\nolimits_{x=0}^n \frac{(ac)^x e^{-ac}}{x!} \right]$
+
+\textbf{Exponential (Cont.):} $X \sim \text{Exp}(\lambda)$ \\
+$f(x) = \lambda e^{-\lambda x} \quad (x \ge 0)$; $E[X] = \frac{1}{\lambda}, Var(X) = \frac{1}{\lambda^2}$ \\
+\textbf{Gamma / Integration Shortcut:} \\
+$\int_0^{\infty} \lambda^n e^{-a\lambda} d\lambda = \frac{n!}{a^{n+1}}$ \\
+\textit{($\lambda$: rate, $n$: total count, $a$: total time)} \\
+Int by Parts: $\int u dv = uv - \int v du$ \\
+$\int x^n e^{-ax} dx = -e^{-ax} \sum\nolimits_{k=0}^{n} \frac{n! x^{n-k}}{k! a^{k+1}}$ \textit{ (Compact Form)}
+
+\textbf{Exp CDF (Area):} $\int_0^c \lambda e^{-\lambda x} dx = 1 - e^{-\lambda c}$ \\
+\textbf{Exp Tail (Survive):} $\int_c^\infty \lambda e^{-\lambda x} dx = e^{-\lambda c}$ \\
+\textbf{Linear Shift ($u$-sub Bypass):} \\
+$\int e^{ax+b} dx = \frac{1}{a} e^{ax+b}, \quad \int (ax+b)^n dx = \frac{(ax+b)^{n+1}}{a(n+1)}$
+
+\subsection*{3. Discrete Bayesian (All PMFs)}
+\textit{Note: All $P(\cdot)$ here are PMFs (Discrete points).} \\
+Bayes: $P(S_i | I) = \frac{P(I | S_i)P(S_i)}{\sum_j P(I | S_j)P(S_j)}$ \\
+Tabular Method: \\
+1. Prior \textbf{PMF}: $P(S_i)$ \\
+2. Likelihood \textbf{PMF}: $P(I|S_i)$ \\
+3. Joint \textbf{PMF}: $P(S_i \cap I) = P(I|S_i)P(S_i)$ \\
+4. Marginal \textbf{PMF}: $P(I) = \sum \text{Joint}$ \\
+5. Posterior \textbf{PMF}: $P(S_i | I) = \text{Joint} / \text{Marginal}$
+
+\subsection*{4. Binomial Sampling Bayes (All PMFs)}
+\textit{Note: Though $f$ is used, binomial is discrete $\to$ PMF.} \\
+Likelihood \textbf{PMF}: $f(r | n, p_i) = C_n^r p_i^r (1-p_i)^{n-r}$ \\
+Posterior \textbf{PMF}:
+$$P(p_i | r, n) = \frac{p_i^r (1-p_i)^{n-r} P(p_i)}{\sum_j p_j^r (1-p_j)^{n-r} P(p_j)}$$
+
+\subsection*{5. Continuous Bayesian (All PDFs)}
+\textit{Note: All $f(\cdot)$ here are PDFs. Use Integration ($\int$) to find probabilities.} \\
+Prior \textbf{PDF}: $f_{\Lambda}(\lambda)$ \\
+Likelihood \textbf{PDF}: $f(x|\lambda)$ \\
+Marginal(unconditional) \textbf{PDF}: $f_X(x) = \int f(x|\lambda) f_{\Lambda}(\lambda) d\lambda$ \\
+Posterior \textbf{PDF}:
+$$f_{\Lambda}(\lambda | x) = \frac{f(x|\lambda) f_{\Lambda}(\lambda)}{\int f(x|\lambda) f_{\Lambda}(\lambda) d\lambda}$$
+Expected Value: $E[\lambda | x] = \int \lambda \cdot f_{\Lambda}(\lambda | x) d\lambda$
+
+
+\section*{Topic 2: Decision Analysis \& Sampling}
+
+\subsection*{Decision Analysis: Universal Bayesian Updating}
+\textbf{The 4-Step Table Method} (Works for ANY evidence/distribution): \\
+\textbf{1. Prior ($P(H_i)$):} Initial probability of each state. \textit{(Must sum to 1)} \\
+\textbf{2. Likelihood ($P(E|H_i)$):} Prob. of seeing the new Evidence IF in state $H_i$. \textit{(Calculated via given rules/distributions. Do NOT sum to 1)} \\
+\textbf{3. Joint:} $\mathbf{Prior \times Likelihood}$. The combined weight. \\
+\textbf{4. Posterior:} $\mathbf{Joint / \sum Joint}$. The updated probability. \textit{(Normalized to sum to 1)} \\
+\textit{*Crucial: Always use the Posterior probabilities to calculate the NEW EMV for your final decision.*}
+
+\subsection*{1. Decision Under Uncertainty (No Probs)}
+\textbf{Maximax:} $\max (\max \text{Payoff})$ (Optimistic) \\
+\textbf{Maximin:} $\max (\min \text{Payoff})$ (Pessimistic) \\
+\textbf{Hurwicz (Realism):} $\alpha(\text{Max in Row}) + (1-\alpha)(\text{Min in Row})$ \\
+\textbf{Minimax Regret:} Regret = (Best in Col) - Payoff. Choose act with $\min (\max \text{Regret})$. \\
+\textbf{Laplace:} Average all payoffs in the row. Choose Max.
+
+\subsection*{2. Prior Analysis (Before Sample)}
+\textbf{EMV$_{\text{prior}}$:} Expected Monetary Value $= \sum [ P_{\text{prior}}(s_i) \cdot \text{Payoff}(s_i) ]$. Choose Max. \\
+\textbf{EOL$_{\text{prior}}$:} Expected Opp Loss $= \sum [ P_{\text{prior}}(s_i) \cdot \text{Regret}(s_i) ]$. Choose Min. \\
+\textit{Optimal Act $a^0$ has Max EMV$_{\text{prior}}$ (which equals Min EOL$_{\text{prior}}$).}
+
+\subsection*{3. Value of Perfect Info (EVPI)}
+Upper bound for any research cost. \\
+\textbf{EVWPI} (Expected Value With Perfect Info) $= \sum [ P_{\text{prior}}(s_i) \cdot (\text{Best Payoff in } s_i) ]$. \\
+\textbf{EVPI} $= \text{EVWPI} - \max(\text{EMV}_{\text{prior}})$. \\
+\textit{Shortcut: EVPI is exactly equal to $\min(\text{EOL}_{\text{prior}})$ of optimal act $a^0$!}
+
+\subsection*{4. Pipeline: EVSI (Buying Imperfect Info $z$)}
+When you buy imperfect info (Sample/Survey $z$). \\
+\textbf{Step 1 (Prior):} Find optimal act $a^0$ and its $\text{EMV}_{\text{prior}}$ without sample. \\
+\textbf{Step 2 (Sample Prob $P(z)$):} Use Bayes to find total probability of getting survey result $P(z)$. \\
+\textbf{Step 3 (Posterior EMV):} For a specific result $z$, update state probs to $\mathbf{P_{\text{post}}(s_i|z)}$. Calculate new EMVs. Find optimal act $a_z^0$ and its $\mathbf{\text{EMV}_{\text{post}}(z)}$. \\
+\textbf{Step 4 (EMV With Sample):} Multiply each optimal posterior EMV by the probability of getting that survey result: \\
+$\text{EMVS} = \sum [ P(z) \cdot \text{EMV}_{\text{post}}(z) ]$. \\
+\textbf{Step 5 (EVSI \& ENGS):} \\
+\textbf{EVSI} $= \text{EMVS} - \max(\text{EMV}_{\text{prior}})$. \\
+\textbf{ENGS} (Expected Net Gain) $= \text{EVSI} - \text{Cost of Sample}$. \\
+\textit{Rule: If ENGS $> 0$, buy the sample information!}
+
+\subsection*{5. Marginal Analysis (Discrete)}
+Let $P$: Prob(Success), $k$: Cost of under-ordering, $h$: Cost of over-ordering. \\
+Optimal quantity $Q^*$ satisfies: $P(D < Q^*) = \frac{k}{k+h}$
+
+\section*{Topic 3: Utility Theory (Single)}
+
+\subsection*{1. Risk Attitudes}
+Let $U(x)$ be the utility function, $x$ be the payoff.\\
+\textbf{Risk Averse:} $U''(x) < 0$ (Concave curve) \\
+Prefers sure amount over lottery. $CE < E[X]$ \\
+\textbf{Risk Neutral:} $U''(x) = 0$ (Linear line) \\
+Indifferent. $CE = E[X]$ \\
+\textbf{Risk Seeking:} $U''(x) > 0$ (Convex curve) \\
+Prefers lottery over sure amount. $CE > E[X]$
+
+\subsection*{2. Core Metrics}
+For a lottery $L$ with payoffs $x_i$ and probabilities $p_i$: \\
+\textbf{Expected Value (EMV):} $E[X] = \sum p_i x_i$ \\
+\textbf{Expected Utility:} $E[U(X)] = \sum p_i U(x_i)$ \\
+\textbf{Certainty Equivalent (CE):} \\
+The guaranteed return having the same utility as $L$. \\
+$U(CE) = E[U(X)] \implies CE = U^{-1}(E[U(X)])$ \\
+\textbf{Risk Premium ($\pi$):} \\
+The amount "paid" to avoid risk. \\
+$\pi = E[X] - CE$ \\
+\textit{Risk Averse $\Rightarrow \pi > 0$; Risk Seeking $\Rightarrow \pi < 0$}
+
+\subsection*{3. Lottery Pricing (Buying vs Selling)}
+Let $W$ = Current Wealth (Asset Position), $L$ = Lottery. \\
+\textbf{Buying Price ($B$):} \\
+Max amount willing to pay to acquire the right to play $L$. \\
+$U(W) = E[U(W - B + L)]$ \\
+\textit{(Utility of staying with current wealth = Expected utility of paying B and playing L)} \\
+\textbf{Selling Price ($S$):} \\
+Min amount willing to accept to give up the right to play $L$. \\
+$U(W + S) = E[U(W + L)]$ \\
+\textit{(Utility of taking cash S and walking away = Expected utility of playing L with current wealth)}
+
+\subsection*{4. Common Utility Functions \& Price Properties}
+\textbf{1. Exponential Utility:} $U(x) = 1 - e^{-x/R}$ ($R > 0$) \\
+\textit{Property: \textbf{CARA} (Constant Absolute Risk Aversion).} \\
+\textbf{Comment:} Exhibits the Delta Property. Buying Price = Selling Price ($B=S$). Strictly independent of initial wealth $W$.
+
+\textbf{2. Logarithmic Utility:} $U(x) = \ln(x)$ ($x > 0$) \\
+\textit{Property: \textbf{DARA} (Decreasing Absolute Risk Aversion).} \\
+\textbf{Comment:} Exhibits the Wealth Effect. As wealth increases, risk aversion decreases. Therefore, Selling Price $>$ Buying Price ($S>B$). Depends on $W$.
+
+\textbf{3. Quadratic Utility:} $U(x) = ax - bx^2$ ($b > 0, x \le a/2b$) \\
+\textit{Property: \textbf{IARA} (Increasing Absolute Risk Aversion).} \\
+\textbf{Comment:} As wealth increases, risk aversion increases (economically counter-intuitive). Therefore, Buying Price $>$ Selling Price ($B>S$). Depends on $W$.
+
+\subsection*{5. Indifference Lotteries}
+To find an unknown parameter (e.g., $R$ or $\alpha$): \\
+If a person is "indifferent" between $L_1$ and $L_2$: \\
+Set $E[U(L_1)] = E[U(L_2)]$ and solve for the unknown.
+
+
+\section*{Topic 4: Multi-Attribute Utility}
+
+\subsection*{1. Independence Conditions}
+Let $u(x, y)$ be utility of attribute $X$ and $Y$. \\
+\textbf{Additive Independence (AI):} \\
+$u(x, y) = k_x u_x(x) + k_y u_y(y)$ where $k_x + k_y = 1$. \\
+\textit{Condition: Preferences over lotteries on X,Y depend only on marginal distributions.} \\
+\textbf{Utility Independence (UI):} \\
+$X$ is UI of $Y$ if preferences over lotteries on $X$ do not depend on fixed $y$. \\
+\textbf{Mutual Utility Independence (MUI):} \\
+$X$ is UI of $Y$ AND $Y$ is UI of $X$.
+
+\subsection*{2. Multiplicative Form (MUI)}
+If $X, Y$ are MUI, total utility is: \\
+$u(x, y) = k_x u_x(x) + k_y u_y(y) + k u_x(x) u_y(y)$ \\
+where $k = 1 - k_x - k_y$. \\
+\textbf{Scaling:} $u(x^*, y^*) = 1$, $u(x^0, y^0) = 0$. \\
+$u_i(x_i^*) = 1$, $u_i(x_i^0) = 0$. \\
+\textbf{Finding $k_i$:} $k_x = u(x^*, y^0)$, $k_y = u(x^0, y^*)$.
+
+\subsection*{3. Evaluation Steps}
+Step 1: Define $u_x(x)$ and $u_y(y)$ based on Topic 3 (Risk Attitude). \\
+Step 2: Solve for $k_x, k_y$ using boundary conditions or indifference points. \\
+Step 3: Determine $k = 1 - k_x - k_y$. \\
+Step 4: Calculate $u(x,y)$ for all choices and rank by $E[u(x,y)]$.
+
+\section*{Topic 5: Analytic Hierarchy (AHP)}
+
+\subsection*{1. Minimize CI \& Unknowns (KFC Yiu's Trick)}
+\textbf{1. The 3x3 Transitive Rule (Primary):} \\
+To minimize CI ($CI \to 0$), force perfect consistency: \\
+$\mathbf{a_{ik} = a_{ij} \times a_{jk}}$ \textit{(e.g., $a_{13} = a_{12} \times a_{23}$, solve for $x, y$)} \\
+\textit{Proof: By AM-GM inequality, $3 \times 3$ $\lambda_{\max}$ is minimized when sum of reciprocal cycles $k+1/k \ge 2$ (where $k = \frac{a_{12} \times a_{23}}{a_{13}}$) reaches minimum at $k=1$.} \\
+\textbf{2. The 1-9 Scale Boundary (Edge Case):} \\
+Saaty scale is strictly 1 to 9. If Transitive Rule yields $a_{ij} > 9$ (e.g., $4 \times 3 = 12$), you MUST cap it: $\mathbf{a_{ij} = 9}$ (closest valid num). \\
+\textbf{3. The 4x4 Multi-Path Conflict:} \\
+If reaching node $D$ from $A$ yields conflicting path results (e.g., via $B \to 6$, via $C \to 8$), use \textbf{Geometric Mean}: \\
+$a_{14}^* = \sqrt{\text{Path 1} \times \text{Path 2}} = \sqrt{6 \times 8} \approx 6.93$.
+
+\subsection*{2. Standard 6-Step Calculation (e.g., 3x3)}
+Given Matrix $A$. \\
+\textbf{Step 1: Col Sum ($C_j$)} \\
+$C_1 = a_{11}+a_{21}+a_{31}$, $C_2 = \dots$, $C_3 = \dots$ \\
+\textbf{Step 2: Normalize ($a'_{ij}$)} \\
+Divide each element by its Col Sum: $a'_{ij} = a_{ij} / C_j$ \\
+\textbf{Step 3: Weights Vector ($w_i$)} \\
+Row average of Normalized Matrix: \\
+$w_1 = (a'_{11} + a'_{12} + a'_{13}) / 3$ (Same for $w_2, w_3$) \\
+\textbf{Step 4: Weighted Sum Vector ($v_i$)} \\
+Multiply original $A$ by $w$: \\
+$v_1 = a_{11}w_1 + a_{12}w_2 + a_{13}w_3$ (Same for $v_2, v_3$) \\
+\textbf{Step 5: Max Eigenvalue ($\lambda_{\max}$)} \\
+$\lambda_{\max} = \frac{1}{3} (v_1/w_1 + v_2/w_2 + v_3/w_3)$ \\
+\textbf{Step 6: Test CI and CR} \\
+$CI = \frac{\lambda_{\max} - n}{n - 1}$ ($3*3 \rightarrow n=3$) \\
+$CR = CI / RI$ (Accept if $< 0.10$. $RI_{n=3}=0.58, RI_{n=4}=0.90$)
+
+\subsection*{3. Reverse Engineering (Weights $\to$ Matrix)}
+If $w_1, w_2, w_3$ are given and Matrix $A$ is unknown: \\
+Assume perfectly consistent: $a_{ij} = w_i / w_j$. \\
+\textit{(e.g., $a_{12} = w_1 / w_2$, $a_{31} = w_3 / w_1$)}
+
+
+\section*{Topic 6: Game Theory (Pipeline)}
+
+\textbf{Two-Person Zero-Sum Game}
+\begin{itemize}
+    \item Payoff matrix $A = [a_{ij}]$: amount Player I wins from Player II.
+    \item $\sum\nolimits$ payoffs = $0$ for all outcomes.
+\end{itemize}
+
+\textbf{Gain Floor \& Loss Ceiling (exist for ALL games)} \\
+Gain Floor (maximin): $v_I' = \max\nolimits_{i}\left\{\min\nolimits_{j} a_{ij}\right\}$ \\
+Loss Ceiling (minimax): $v_{II}' = \min\nolimits_{j}\left\{\max\nolimits_{i} a_{ij}\right\}$
+
+\textbf{Expected Gain Floor \& Expected Loss Ceiling (Mixed Strategies)} \\
+Expected Gain Floor: $v_I = \max\nolimits_{x}\left\{\min\nolimits_{j} x A_{\cdot j}\right\}$ \\
+Expected Loss Ceiling: $v_{II} = \min\nolimits_{y}\left\{\max\nolimits_{i} A_{i\cdot} y^T\right\}$
+
+\textbf{Minimax Inequality}: 
+$v_I' \le v_I = v_{II} \le v_{II}'$ \\
+If $v_I' = v_{II}' = v$, then a \textbf{saddle point} exists.
+
+\textbf{Saddle Point}:
+An entry $a_{ij}$ that is the \textbf{minimum in its row} and \textbf{maximum in its column}.
+
+\textbf{Minimax Theorem}:
+Every finite two-person zero-sum game has optimal mixed strategies, and 
+$\max\nolimits_{x}\min\nolimits_{y} xAy^T = \min\nolimits_{y}\max\nolimits_{x} xAy^T = v$
+where $v$ is the \textbf{value of the game}.
+
+\textbf{Dominance}:
+\begin{itemize}
+    \item Row $k$ dominates Row $l$ if $a_{kj} \ge a_{lj}$ for all $j$.
+    \item Column $k$ dominates Column $l$ if $a_{ik} \le a_{il}$ for all $i$.
+\end{itemize}
+
+\subsection*{Step 1: Find Saddle Point (Pure)}
+1. \textbf{Row (Maximin):} Find min of each row $\to$ Pick the MAX. \\
+2. \textbf{Col (Minimax):} Find max of each col $\to$ Pick the MIN. \\
+\textit{If Maximin = Minimax = $v$, stop! Optimal is pure (1s and 0s).}
+
+\subsection*{Step 2: Dominance (Reduce Matrix)}
+\textbf{Row wants MAX:} If Row A $\ge$ Row B $\implies$ \textbf{DELETE SMALLER} Row B. \\
+\textbf{Col wants MIN:} If Col A $\le$ Col B $\implies$ \textbf{DELETE LARGER} Col B. \\
+\textit{Repeat until 2x2. Remember which rows/cols you deleted!}
+
+\subsection*{Step 3: Solve 2x2 (Matrix Method \& Shortcut)}
+Matrix $A = [a, b; c, d]$. Let $J = [1, 1]$, $A^* = [d, -b; -c, a]$, $|A| = ad - bc$. \\
+\textbf{Formulas:} $x = \frac{JA^*}{JA^*J^T}, \quad y = \frac{J(A^*)^T}{JA^*J^T}, \quad v = \frac{|A|}{JA^*J^T}$ \\
+\textit{(Shortcut: Denom $\Delta = a+d-b-c$. \\
+Row $x \implies$ sum cols/$\Delta$. Col $y \implies$ sum rows/$\Delta$.)} \\
+\textbf{eg.:} $A = \left[ \begin{smallmatrix} 4 & 3 \\ 3 & 5 \end{smallmatrix} \right] \implies \text{Swap \& Negate} \implies A^* = \left[ \begin{smallmatrix} 5 & -3 \\ -3 & 4 \end{smallmatrix} \right]$. $\Delta = 5-3-3+4 = \mathbf{3}$. \\
+\textbf{Row $x$ (Sum Cols of $A^*$ $\downarrow$):} Col 1 $= 5-3=2$, Col 2 $= -3+4=1 \implies \mathbf{x = [2/3, 1/3]}$. \\
+\textbf{Col $y$ (Sum Rows of $A^*$ $\rightarrow$):} Row 1 $= 5-3=2$, Row 2 $= -3+4=1 \implies \mathbf{y = [2/3, 1/3]}$.
+
+\subsection*{Step 4: Restore Original Vector (Add 0s)}
+Map $x, y$ back to original size to get $x^*, y^*$. \\
+Assign $0$ to any strategy that was deleted in Step 2. \\
+\textit{Example: If Row 3 was deleted, $x^* = (x_1, x_2, 0)$.}
+
+\subsection*{Alternative: Graphical Method ($2 \times 3$ Example)}
+\begin{minipage}[t]{0.56\linewidth}
+\vspace{0pt}
+\raggedright
+\textbf{Ex:} $A \!=\! \left[ \begin{smallmatrix} 2 & 5 & 8 \\ 6 & 2 & 1 \end{smallmatrix} \right]$ \\
+\textbf{1.} Draw lines for Col 1,2,3 from $p\!=\!0$ (Row 2) to $p\!=\!1$ (Row 1). \\
+\textbf{2.} Trace \textbf{BOTTOM} outline (thick line = Lower Env). \\
+\textbf{3.} Find \textbf{HIGHEST} peak. \\
+\textbf{4.} Peak is Line 1 \& 2. Line 3 is useless $\implies$ \textbf{DELETE} Col 3. \\
+\textit{($m \times 2$: TOP outline, LOWEST valley).}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.42\linewidth}
+\vspace{0pt}
+\raggedleft
+\begin{tikzpicture}[xscale=0.45, yscale=0.15, every node/.style={scale=0.6}]
+  \draw[->, thick] (-0.2,0) -- (4.5,0) node[right] {$p$};
+  \draw[->, thick] (0,-0.5) -- (0,8.5) node[above=-2pt] {Pay};
+  \draw[thick] (4,0) -- (4,8.5); 
+  \node[below] at (0,0) {$0$}; \node[below] at (4,0) {$1$};
+  \draw[gray, thick] (0,6) -- (4,2) node[pos=0.1, above right=-2pt, text=black] {L1};
+  \draw[gray, thick] (0,2) -- (4,5) node[pos=0.8, above left=-2pt, text=black] {L2};
+  \draw[gray, thick] (0,1) -- (4,8) node[pos=0.9, left, text=black] {L3};
+  \draw[line width=1.5pt] (0,1) -- (1,2.75) -- (2.28, 3.71) -- (4,2);
+  \filldraw (2.28, 3.71) circle (2pt) node[above=2pt] {\textbf{Peak}};
+\end{tikzpicture}
+\end{minipage}
+
+\subsection*{Statistical Games, Loss and Decision Functions}
+\textbf{1. Mathematical Definitions}
+\begin{itemize}
+    \item \textbf{Decision Function}: A rule $d(x)$ mapping observation $x$ to an action $a$.
+    \item \textbf{Loss Function}: $L(d(x), \theta)$ is the cost incurred when taking action $d(x)$ given true state $\theta$.
+    \item \textbf{Risk Function}: $R(d, \theta) = E_{X|\theta} [L(d(X), \theta)] = \sum\nolimits_{x} L(d(x), \theta) \cdot P(X=x \mid \theta)$. \\
+    (Risk is the \textbf{average loss} of rule $d$ across all $x$ for a fixed $\theta$).
+    \item \textbf{Minimax Criterion}: $\min\nolimits_{d} \max\nolimits_{\theta} R(d, \theta)$. Choose $d$ to minimize the maximum possible risk.
+    \item \textbf{Equalizer Rule}: A rule $d^*$ where $R(d^*, \theta) = \text{C}$ (constant) for all $\theta$.
+\end{itemize}
+
+\textbf{2. Risk Matrix Example (Coin Decision)}
+\textit{Setup: Nature $\theta_1$(2-head), $\theta_2$(Bal.); Decision $d_i$ (Logic rules).}
+\begin{center}
+\setlength{\tabcolsep}{2pt}
+\tiny
+\begin{tabular}{|c|c|c|c|c|} \hline
+$R(d, \theta)$ & $d_1$ & $d_2$ & $d_3$ & $d_4$ \\ \hline
+$\theta_1$ & 0 & 0 & 1 & 1 \\ \hline
+$\theta_2$ & 0.5 & 1.0 & 0 & 0.5 \\ \hline
+\textbf{Max Risk} & \textbf{0.5} & 1.0 & 1.0 & 1.0 \\ \hline
+\end{tabular}
+\end{center}
+\textbf{Minimax Choice}: Rule $d_1$ (it has the smallest maximum risk: 0.5).
+
+\textbf{3. Calculation Shortcut (Equalizer Principle)}
+To find optimal constants ($a, b$) for an estimator $d(x) = \frac{x+a}{n+b}$:
+\begin{itemize}
+    \item \textbf{Step 1}: Write out the Risk Function $R(d, \theta)$ in terms of $\theta$.
+    \item \textbf{Step 2}: \textbf{Force Constant Risk}: Set all coefficients of $\theta$ and $\theta^2$ in the $R(d, \theta)$ expression to \textbf{zero}.
+    \item \textbf{Step 3}: Solve the resulting equations for $a$ and $b$.
+\end{itemize}
+\textit{Note: This makes the risk "spyproof" and independent of Nature's state.}
+
+
+\clearpage
+
+% ==================== 23/24 Semester 2 Past Paper & Solutions ====================
+
+\subsection*{23/24 Q1: Decision Criteria \& Decision Trees}
+\textbf{[Q1a]} Returns depend on investment size and market state.
+
+{\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\hline
+Size & Good & Fair & Poor \\
+\hline
+S  & 5k  & 2k & -1k \\
+M  & 8k  & 3k & -2k \\
+L  & 11k & 4k & -3k \\
+VL & 15k & 1k & -10k \\
+\hline
+\end{tabular}
+\end{center}
+}
+All states equally likely.
+
+\textbf{[Sol 1a]}
+\textit{Prob:} $P(G)=P(F)=P(P)=1/3$. \\
+\textbf{EMV:}
+$EMV(S)=\frac{5k+2k-1k}{3}=2000$, 
+$EMV(M)=\frac{8k+3k-2k}{3}=3000$, \\
+$EMV(L)=\frac{11k+4k-3k}{3}=\mathbf{4000}$, 
+$EMV(VL)=\frac{15k+1k-10k}{3}=2000$. \\
+$\Rightarrow$ choose \textbf{Large}. \\
+\textbf{EOL:} best-by-column = $(15k,4k,-1k)$.
+
+{\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\hline
+Size & G regret & F regret & P regret \\
+\hline
+S  & 10k & 2k & 0 \\
+M  & 7k  & 1k & 1k \\
+L  & 4k  & 0  & 2k \\
+VL & 0   & 3k & 9k \\
+\hline
+\end{tabular}
+\end{center}
+}
+$EOL(S)=4000$, $EOL(M)=3000$, $EOL(L)=\mathbf{2000}$, $EOL(VL)=4000$. \\
+$\Rightarrow$ choose \textbf{Large}. \\
+\textbf{EVPI:}
+$EPPI=\frac{15k+4k-1k}{3}=6000$, 
+$EVPI=6000-4000=\mathbf{2000}$. \\
+Rule: \textit{EVPI = min EOL}.
+
+\vspace{2pt}
+\textbf{[Q1b]} New product: $F(0.6) \to +2000$, $U(0.4) \to -1500$; forecast cost $=200$; \\
+$P(f|F)=0.8$, $P(u|U)=0.7$.
+
+\textbf{[Sol 1b]}
+\textbf{No info:}
+$EMV(M)=0.6(2000)+0.4(-1500)=600$, 
+$EMV(N)=0$. So baseline $=600$. \\
+\textbf{Bayes:}
+$P(f)=0.8(0.6)+0.3(0.4)=0.60$, 
+$P(u)=0.40$. \\
+$P(F|f)=0.80$, $P(U|f)=0.20$; 
+$P(F|u)=0.30$, $P(U|u)=0.70$. \\
+\textit{(i) With info, gross:} \\
+$f:$ $EMV(M)=0.8(2k)+0.2(-1.5k)=1300$, $EMV(N)=0$ $\Rightarrow M$. \\
+$u:$ $EMV(M)=0.3(2k)+0.7(-1.5k)=-450$, $EMV(N)=0$ $\Rightarrow N$. \\
+$EMVS=0.6(1300)+0.4(0)=780$, net $=780-200=580<600$. \\
+\textbf{Optimal:} \textbf{do not buy} forecast; choose \textbf{Market}. \\
+\textit{(ii)} $EVSI=780-600=\mathbf{180}$, 
+$EPPI=0.6(2000)+0.4(0)=1200$, 
+$EVPI=1200-600=\mathbf{600}$. \\
+\textit{(iii) Refund if wrong:} \\
+$f:$ $EMV(M)=0.8(2k-200)+0.2(-1.5k)=1140$, 
+$EMV(N)=0.8(-200)=-160$ $\Rightarrow M$. \\
+$u:$ $EMV(M)=0.3(2k)+0.7(-1.5k-200)=-590$, 
+$EMV(N)=0.7(-200)=-140$ $\Rightarrow N$. \\
+Net $=0.6(1140)+0.4(-140)=\mathbf{628}>600$. \\
+\textbf{Optimal: buy forecast}; if $f$ then Market, if $u$ then No Market.
+
+\textbf{Q1b Tree:}
+\begin{center}
+\makebox[\columnwidth][c]{%
+\begin{tikzpicture}[
+    x=1cm,
+    y=1cm,
+    grow=right,
+    font=\tiny,
+    level 1/.style={level distance=19mm, sibling distance=20mm},
+    level 2/.style={level distance=17mm, sibling distance=11.5mm},
+    level 3/.style={level distance=14mm, sibling distance=6.5mm},
+    every node/.style={draw=black, line width=0.2pt, inner sep=1pt, align=center},
+    decision/.style={rectangle, text width=9mm},
+    chance/.style={circle, minimum size=4.5mm},
+    terminal/.style={rectangle, draw=none, inner sep=0.5pt},
+    edge from parent/.style={draw=black, line width=0.2pt, ->}
+]
+\node[decision] {Start\\best = 600}
+    child {
+        node[chance] {Forecast}
+            child {
+                node[decision] {$u$\\best = 0}
+                    child {
+                        node[chance] {$M$\\-450}
+                            child {node[terminal] {-1500} edge from parent node[below] {$U\,0.7$}}
+                            child {node[terminal] {2000} edge from parent node[above] {$F\,0.3$}}
+                        edge from parent node[below] {$M$}
+                    }
+                    child {
+                        node[terminal] {0}
+                        edge from parent node[above] {$N$}
+                    }
+                edge from parent node[below] {$u\,0.4$}
+            }
+            child {
+                node[decision] {$f$\\best = 1300}
+                    child {
+                        node[terminal] {0}
+                        edge from parent node[below] {$N$}
+                    }
+                    child {
+                        node[chance] {$M$\\1300}
+                            child {node[terminal] {-1500} edge from parent node[below] {$U\,0.2$}}
+                            child {node[terminal] {2000} edge from parent node[above] {$F\,0.8$}}
+                        edge from parent node[above] {$M$}
+                    }
+                edge from parent node[above] {$f\,0.6$}
+            }
+        edge from parent node[below, align=center] {Forecast\\net = 580}
+    }
+    child {
+        node[decision] {No Forecast\\best = 600}
+            child {
+                node[terminal] {0}
+                edge from parent node[below] {$N$}
+            }
+            child {
+                node[chance] {$M$\\600}
+                    child {node[terminal] {-1500} edge from parent node[below] {$U\,0.4$}}
+                    child {node[terminal] {2000} edge from parent node[above] {$F\,0.6$}}
+                edge from parent node[above] {$M$}
+            }
+        edge from parent node[above] {No Forecast}
+    };
+\end{tikzpicture}%
+}
+\end{center}
+\textit{$M$=Market, $N$=No Market. Root compares net values: No Forecast $600$ vs Forecast $580$.}
+
+% --------------------------------------------------------------------------------
+
+\subsection*{Q2: Continuous Distributions \& Utility}
+\textbf{[Q2a]} $G(0.6): f(x)=9xe^{-3x}$; $B(0.4): f(x)=\frac12 e^{-x/2}$. Find (i) $P(X>2)$, (ii) $P(G|X<2)$.
+
+\textbf{[Sol 2a]}
+\textit{(i)}
+$P(X>2|G)=\int_2^\infty 9xe^{-3x}dx=7e^{-6}$. \\
+$P(X>2|B)=\int_2^\infty \frac12 e^{-x/2}dx=e^{-1}$. \\
+$P(X>2)=0.6(7e^{-6})+0.4(e^{-1})=\mathbf{4.2e^{-6}+0.4e^{-1}\approx 0.147}$. \\
+\textit{(ii)}
+$P(X<2)=1-P(X>2)\approx 0.853$, 
+$P(X<2|G)=1-7e^{-6}$. \\
+$P(G|X<2)=\dfrac{0.6(1-7e^{-6})}{1-4.2e^{-6}-0.4e^{-1}}\approx \mathbf{0.700}$.
+
+\vspace{2pt}
+\textbf{[Q2b]} $u(x_1,x_2)=0.5u_1+0.7u_2+k_3u_1u_2$. Determine dependence, find $k_3$, then rank:
+$L_1=(30,100)$,
+$L_2=0.5(30,100)+0.5(0,0)$,
+$L_3=0.6(30,100)+0.4(0,0)$,
+$L_4=(30,0)$,
+$L_5=(0,100)$,
+$L_6=0.4(30,0)+0.6(0,100)$.
+
+\textbf{[Sol 2b]}
+Dependent because $k_3\neq 0$. \\
+Set $u(30,100)=1$, $u(0,0)=0$:
+$1=0.5+0.7+k_3 \Rightarrow \mathbf{k_3=-0.2}$. \\
+$u(L_1)=1$, $u(L_2)=0.5$, $u(L_3)=0.6$, 
+$u(L_4)=0.5$, $u(L_5)=0.7$, $u(L_6)=0.4(0.5)+0.6(0.7)=0.62$. \\
+\textbf{Rank:} $\mathbf{L_1 \succ L_5 \succ L_6 \succ L_3 \succ L_2 \sim L_4}$.
+
+% --------------------------------------------------------------------------------
+
+\subsection*{Q3: AHP \& Risk Attitude}
+\textbf{[Q3a]} 
+$A=\begin{pmatrix}1&2&6\\ a&c&d\\ b&1/3&1\end{pmatrix}$,
+$A_{norm}=\begin{pmatrix}0.6&0.6&0.4615\\ 0.3&0.3&0.4615\\ 0.1&0.1&0.0769\end{pmatrix}$.
+Find $a,b,c,d$; then CI, CR; then fix for consistency.
+
+\textbf{[Sol 3a]}
+\textit{(i)}
+Col 1 sum $=1/0.6=5/3$:
+$1+a+b=5/3 \Rightarrow a=\mathbf{0.5},\ b=\mathbf{1/6}$. \\
+Col 2 sum $=2/0.6=10/3$:
+$2+c+1/3=10/3 \Rightarrow \mathbf{c=1}$. \\
+Col 3 sum $\approx 6/0.4615=13$:
+$6+d+1=13 \Rightarrow \mathbf{d=6}$. \\
+\textit{(ii)} Row-average weights:
+$W=(0.5538,0.3538,0.0923)^T$. \\
+$AW=(1.8152,1.1845,0.3026)^T$, 
+$\lambda_{\max}=\frac13\left(\frac{1.8152}{0.5538}+\frac{1.1845}{0.3538}+\frac{0.3026}{0.0923}\right)=3.301$. \\
+$CI=\frac{3.301-3}{2}=\mathbf{0.1505}$,
+$CR=\frac{0.1505}{0.58}=\mathbf{0.2595>0.1}$ (inconsistent). \\
+\textit{(iii)} Perfect consistency needs 
+$a_{12}a_{23}=a_{13}$, so $2d=6 \Rightarrow \mathbf{d=3}$.
+
+\vspace{2pt}
+\textbf{[Q3b]} $u(x)=\ln x$, wealth $=30000$. \\
+$L_1$: probability $\alpha$ of losing $20000$, else $0$; 
+$L_2$: certain loss $3000$.
+
+\textbf{[Sol 3b]}
+Risk attitude: $u''(x)=-1/x^2<0 \Rightarrow$ \textbf{risk-averse}. \\
+Indifference $L_1\sim L_2$:
+\[
+\alpha\ln(10k)+(1-\alpha)\ln(30k)=\ln(27k)
+\]
+\[
+\alpha\ln(1/3)=\ln(0.9)
+\Rightarrow \alpha=\frac{\ln(0.9)}{\ln(1/3)}\approx \mathbf{0.0959}
+\]
+$E(W_{L1})=0.0959(10k)+0.9041(30k)=28082$, 
+$CE=27000$. \\
+Risk premium $=28082-27000=\mathbf{\$1082}$.
+
+% --------------------------------------------------------------------------------
+
+\subsection*{Q4: Expected Opportunity Loss \& Game Theory}
+\textbf{[Q4a]} Defect rates: A$(1\%,0.6)$, B$(3\%,0.3)$, C$(5\%,0.1)$.
+
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{center}
+\begin{tabular}{@{}lcc@{}}
+\hline
+Event & Reject $a_1$ & Accept $a_2$ \\
+\hline
+A & -\$1500 & \$2000 \\
+B & -\$500  & \$100 \\
+C & \$1500  & -\$2500 \\
+\hline
+\end{tabular}
+\end{center}
+}
+Find (i) EVPI, (ii) verify $\bar v_t+\bar l_t=c$, (iii) after sampling 10 with 2 defectives, accept or reject?
+
+\textbf{[Sol 4a]}
+\textit{(i)}
+$EMV(a_1)=0.6(-1500)+0.3(-500)+0.1(1500)=-900$. \\
+$EMV(a_2)=0.6(2k)+0.3(100)+0.1(-2.5k)=\mathbf{980}$. \\
+$EPPI=0.6(2000)+0.3(100)+0.1(1500)=1380$, 
+$EVPI=1380-980=\mathbf{\$400}$. \\
+\textit{(ii)} Regrets using best-by-state $(2000,100,1500)$:
+$a_1:(3500,600,0)$, $a_2:(0,0,4000)$. \\
+$\bar l_t(a_1)=0.6(3500)+0.3(600)=2280$, 
+$\bar l_t(a_2)=0.1(4000)=400$. \\
+$\bar v_t(a_1)+\bar l_t(a_1)=-900+2280=\mathbf{1380}$, 
+$\bar v_t(a_2)+\bar l_t(a_2)=980+400=\mathbf{1380}$. \\
+\textit{(iii)} Bayesian update with likelihood $L\propto p^2(1-p)^8$:
+$J(A)=0.6(0.000092)=0.000055$, 
+$J(B)=0.3(0.000705)=0.000211$, 
+$J(C)=0.1(0.001658)=0.000166$. \\
+$\sum J=0.000432$. Hence 
+$P(A|r=2)=55/432\approx0.128$, 
+$P(B|r=2)=211/432\approx0.489$, 
+$P(C|r=2)=166/432\approx0.383$. \\
+$EMV(a_1)=0.128(-1.5k)+0.489(-500)+0.383(1.5k)=\mathbf{138}$. \\
+$EMV(a_2)=0.128(2k)+0.489(100)+0.383(-2.5k)=-653$. \\
+\textbf{Decision: Reject $a_1$.}
+
+\vspace{2pt}
+\textbf{[Q4b]} 
+$A=\begin{pmatrix}4&8&2&10\\ 2&4&5&7\\ 2&8&5&6\\ 2&1&1&7\end{pmatrix}$,
+$B=\begin{pmatrix}5&8&3&5\\ 2&6&2&6\\ 4&1&2&9\\ 3&3&2&5\end{pmatrix}$.
+Find saddle point, optimal strategies, and game value.
+
+\textbf{[Sol 4b]}
+\textbf{Matrix A:}
+row mins $=\{2,2,2,1\}$ so gain floor $=2$; 
+col maxes $=\{4,8,5,10\}$ so loss ceiling $=4$. No saddle point. \\
+Domination: delete $R4$, $R2$, $C4$, $C2$. Reduced game:
+$\begin{pmatrix}4&2\\2&5\end{pmatrix}$. \\
+Let Player I use $(p,1-p)$:
+$4p+2(1-p)=2p+5(1-p) \Rightarrow p=\mathbf{3/5}$. \\
+Value $=\dfrac{4\cdot5-2\cdot2}{4+5-2-2}=\mathbf{16/5=3.2}$. \\
+Optimal strategies: Player I $=(3/5,0,2/5,0)$,
+Player II $=(3/5,0,2/5,0)$. \\
+\textbf{Matrix B:}
+row mins $=\{3,2,1,2\}$, col maxes $=\{5,8,3,9\}$. \\
+Gain floor $=$ loss ceiling $=\mathbf{3}$, so saddle point at $(1,3)$ and game value $=\mathbf{3}$.
+
+
+% ==================== 22/23 Semester 2 Past Paper & Solutions ====================
+
+\subsection*{22/23 Q1: Decision Criteria \& Decision Trees}
+\textbf{[Q1a]} Returns depend on size and market. $y>0$, states equally likely.
+
+{\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\hline
+Size & Good & Fair & Poor \\
+\hline
+S  & 400 & 300 & 200 \\
+M  & 3y  & 2y  & y \\
+L  & 900 & 800 & 100 \\
+\hline
+\end{tabular}
+\end{center}
+}
+(i) Range of $y$ for Maximax $\to$ Large. (ii) Maximin $\to$ Medium. (iii) EMV decision. (iv) Minimax regret decision.
+
+\textbf{[Sol 1a]}
+\textit{(i) Maximax:} Max payoffs are S=400, M=3y, L=900. For L to be optimal: $900 > 3y \implies \mathbf{0 < y < 300}$. \\
+\textit{(ii) Maximin:} Min payoffs are S=200, M=y, L=100. For M to be optimal: $y > 200$ and $y > 100 \implies \mathbf{y > 200}$. \\
+\textit{(iii) EMV ($200<y<300$):} $P=1/3$.
+$EMV(S)=300$, $EMV(M)=2y \in (400,600)$, $EMV(L)=\mathbf{600}$. $\Rightarrow$ \textbf{Large}. \\
+\textit{(iv) Regret ($200<y<300$):} Max in states $\to$ G(900), F(800), P(y).
+Regret S: max(500, 500, y-200) = 500.
+Regret M: max(900-3y, 800-2y, 0). Since $y>200$, $800-2y > 900-3y \implies 800-2y$ (range 200-400).
+Regret L: max(0, 0, y-100) = y-100 (range 100-200).
+Minimax regret = $\min(500, 800-2y, y-100) = y-100$. $\Rightarrow$ \textbf{Large}.
+
+\vspace{2pt}
+\textbf{[Q1b]} Hot drinks: W(-2000), C(10000). Ice creams: W(8000), C(-1000). Prior: 50\% C, 50\% W. Forecast cost \$500. $P(c|C)=0.9$, $P(w|W)=0.8$. Maximize profits, find EVSI \& EVPI.
+
+\textbf{[Sol 1b]}
+\textbf{No info:} $EMV(Hot)=0.5(10k-2k)=4000$. $EMV(Ice)=0.5(8k-1k)=3500$. Base = 4000 (Hot). \\
+\textbf{Bayes:} $P(c) = 0.9(0.5)+0.2(0.5)=0.55$, $P(w) = 0.1(0.5)+0.8(0.5)=0.45$. \\
+$P(C|c)=9/11$, $P(W|c)=2/11$; $P(C|w)=1/9$, $P(W|w)=8/9$. \\
+\textit{With info, gross:} \\
+$c:$ $EMV(H)=\frac{9}{11}(10k)+\frac{2}{11}(-2k)=7818.2 \implies H$. \\
+$w:$ $EMV(I)=\frac{1}{9}(-1k)+\frac{8}{9}(8k)=7000 \implies I$. \\
+$Gross EMV = 0.55(86000/11) + 0.45(7000) = 4300+3150=7450$. Net $= 7450-500 = \mathbf{6950 > 4000}$. \\
+\textbf{Optimal: Buy forecast}; if $c$ sell Hot, if $w$ sell Ice. \\
+$EVSI=7450-4000=\mathbf{3450}$.
+$EPPI=0.5(10k)+0.5(8k)=9000$. $EVPI=9000-4000=\mathbf{5000}$.
+
+\textbf{Q1b Tree:}
+\begin{center}
+\makebox[\columnwidth][c]{%
+\begin{tikzpicture}[
+    x=1cm,
+    y=1cm,
+    grow=right,
+    font=\tiny,
+    level 1/.style={level distance=17mm, sibling distance=30mm},
+    level 2/.style={level distance=16mm, sibling distance=19mm},
+    level 3/.style={level distance=14mm, sibling distance=10mm},
+    every node/.style={draw=black, line width=0.2pt, inner sep=1pt, align=center},
+    decision/.style={rectangle, text width=10.5mm},
+    chance/.style={circle, minimum size=5mm},
+    terminal/.style={rectangle, draw=none, inner sep=0.6pt, text width=8mm},
+    edge from parent/.style={draw=black, line width=0.2pt, ->},
+    level distance=17mm
+]
+\node[decision] {Start\\best 6950}
+    child {
+        node[chance] {Buy\\Fcst}
+            child {
+                node[decision] {$w$\\best 7000}
+                    child {
+                        node[chance] {$H$\\-666}
+                            child {node[terminal] {W:\\-2000} edge from parent node[below] {$W$}}
+                            child {node[terminal] {C:\\10000} edge from parent node[above] {$C$}}
+                        edge from parent node[below] {$H$}
+                    }
+                    child {
+                        node[chance] {$I$\\7000}
+                            child {node[terminal] {W:\\8000} edge from parent node[below] {$W$}}
+                            child {node[terminal] {C:\\-1000} edge from parent node[above] {$C$}}
+                        edge from parent node[above] {$I$}
+                    }
+                edge from parent node[below] {$w\,0.45$}
+            }
+            child {
+                node[decision] {$c$\\best 7818}
+                    child {
+                        node[chance] {$I$\\636}
+                            child {node[terminal] {W:\\8000} edge from parent node[below] {$W$}}
+                            child {node[terminal] {C:\\-1000} edge from parent node[above] {$C$}}
+                        edge from parent node[below] {$I$}
+                    }
+                    child {
+                        node[chance] {$H$\\7818}
+                            child {node[terminal] {W:\\-2000} edge from parent node[below] {$W$}}
+                            child {node[terminal] {C:\\10000} edge from parent node[above] {$C$}}
+                        edge from parent node[above] {$H$}
+                    }
+                edge from parent node[above] {$c\,0.55$}
+            }
+        edge from parent node[below, align=center] {Buy Fcst\\net 6950}
+    }
+    child {
+        node[decision] {No Info\\best 4000}
+            child {node[terminal] {I:\\3500} edge from parent node[below] {$I$}}
+            child {node[terminal] {H:\\4000} edge from parent node[above] {$H$}}
+        edge from parent node[above] {No Info}
+    };
+\end{tikzpicture}%
+}
+\end{center}
+
+% --------------------------------------------------------------------------------
+
+\subsection*{Q2: Continuous Distributions \& Multi-attribute Utility}
+\textbf{[Q2a]} $f(x|\lambda)=\lambda e^{-\lambda x}$, $f_\Lambda(\lambda)=\frac{\lambda e^{-\lambda/2}}{4}$ ($\lambda \ge 0$). (i) Unconditional pdf, $P(X<1)$? (ii) If $X=1.5$, $P(\Lambda<2)$?
+
+\textbf{[Sol 2a]}
+\textit{(i)} $f(x) = \int_0^\infty \lambda e^{-\lambda x} \frac{\lambda e^{-\lambda/2}}{4} d\lambda = \frac{1}{4} \int_0^\infty \lambda^2 e^{-\lambda(x+0.5)} d\lambda$.
+Shortcut: $\int_0^\infty \lambda^n e^{-a\lambda} d\lambda = \frac{n!}{a^{n+1}}$. Here $n=2, a=x+0.5$.
+$f(x) = \frac{1}{4} \frac{2!}{(x+0.5)^3} = \mathbf{\frac{4}{(2x+1)^3}}$.
+$P(X<1) = \int_0^1 4(2x+1)^{-3} dx = [-(2x+1)^{-2}]_0^1 = -1/9 - (-1) = \mathbf{8/9}$. \\
+\textit{(ii)} Posterior $f(\lambda | 1.5) \propto \lambda e^{-1.5\lambda} \cdot \lambda e^{-0.5\lambda} = \lambda^2 e^{-2\lambda}$.
+Normalize: $\int_0^\infty \lambda^2 e^{-2\lambda} d\lambda = 2!/2^3 = 1/4$. Thus $f(\lambda | 1.5) = 4\lambda^2 e^{-2\lambda}$.
+$P(\Lambda<2|1.5) = \int_0^2 4\lambda^2 e^{-2\lambda} d\lambda = 4(\frac{2!}{2^3}) [1 - e^{-4}(1+4+\frac{16}{2})] = \mathbf{1 - 13e^{-4} \approx 0.762}$.
+
+\vspace{2pt}
+\textbf{[Q2b]} Additive independence $u(x,y)$. $u_X(15)=u_Y(200)=1$, $u_X(60)=u_Y(600)=0$. Data: $u(15,600)=0.75$, $u(60,200)=0.25$, $u(30,600)=0.35$, $u(60,400)=0.15$. (i) Find $u(x,y)$ and $u(30,300)$. (ii) Rank with piecewise linear utilities.
+
+\textbf{[Sol 2b]}
+\textit{(i)} Additive: $u(x,y) = k_1 u_X(x) + k_2 u_Y(y)$.
+$u(15,600) = k_1(1)+0 = 0.75 \implies k_1=0.75$. $u(60,200) = 0+k_2(1) = 0.25 \implies k_2=0.25$.
+$\mathbf{u(x,y) = 0.75u_X(x) + 0.25u_Y(y)}$.
+Find $u(30,300)$: $u(30,600) = 0.75u_X(30)=0.35 \implies u_X(30)=7/15$.
+$u(60,300) = 0.25u_Y(300)=0.20 \implies u_Y(300)=4/5$.
+$u(30,300) = 0.75(7/15) + 0.25(4/5) = \mathbf{0.55}$. \\
+\textit{(ii)} Nodes X: $(15,1), (30, 7/15), (50, 0.2), (60, 0)$. Nodes Y: $(200,1), (300, 0.8), (400, 0.6), (600,0)$.
+C1 (20,500): $u_X(20) = 1 + \frac{5}{15}(\frac{7}{15}-1) = 37/45$. $u_Y(500) = 0.6 + \frac{100}{200}(0-0.6) = 0.3$. $u = \mathbf{0.6917}$.
+C2 (40,250): $u_X(40) = 1/3$. $u_Y(250) = 0.9$. $u = \mathbf{0.475}$.
+C3 (22.5,350): $u_X(22.5) = 11/15$. $u_Y(350) = 0.7$. $u = \mathbf{0.725}$.
+C4 (55,225): $u_X(55) = 0.1$. $u_Y(225) = 0.95$. $u = \mathbf{0.3125}$.
+\textbf{Rank: C3 $\succ$ C1 $\succ$ C2 $\succ$ C4}.
+
+% --------------------------------------------------------------------------------
+
+\subsection*{Q3: AHP \& Certainty Equivalent}
+\textbf{[Q3a]} $w=(0.5, 0.25, 0.125, 0.125)^T$. Perfect consistency $\implies A=$? $Aw=$?
+\textbf{[Sol 3a]} $a_{ij} = w_i/w_j$.
+$A = \begin{pmatrix} 1 & 2 & 4 & 4 \\ 0.5 & 1 & 2 & 2 \\ 0.25 & 0.5 & 1 & 1 \\ 0.25 & 0.5 & 1 & 1 \end{pmatrix}$. $Aw = nw = 4w = \mathbf{(2, 1, 0.5, 0.5)^T}$.
+
+\textbf{[Q3b]} $A = \begin{pmatrix} 1 & 2 & \alpha \\ 0.5 & 1 & 3 \\ \beta & 1/3 & 1 \end{pmatrix}$. (i) If $\alpha=2, \beta=0.5$, find CI. (ii) Best $\alpha, \beta$ for min CI.
+\textbf{[Sol 3b]}
+\textit{(i)} Col sums: $2, 10/3, 6$. Normalized row avgs ($w$): $w_1=0.4778, w_2=0.35, w_3=0.1722$.
+$Aw = (1.522, 1.106, 0.528)^T$. $\lambda_{max} = \frac{1}{3}(\frac{1.522}{0.4778} + \dots) \approx 3.136$. $CI = \frac{3.136-3}{2} = \mathbf{0.068}$.
+\textit{(ii)} Min CI = 0 (perfect consistency). Requires $a_{13} = a_{12}a_{23} \implies \mathbf{\alpha = 2 \times 3 = 6}$. $\mathbf{\beta = 1/6}$.
+
+\textbf{[Q3c]} $u(x)=1-e^{-x/R}$. $L_1$: 50\% \$1000, 50\% -\$500. $L_2$: 100\% \$0. (i) Jason indifferent at W=0. Find R (multiple of 100). (ii) W=\$1000, buy/sell prices for $L_1$?
+\textbf{[Sol 3c]}
+\textit{(i)} $0.5(1-e^{-1000/R}) + 0.5(1-e^{500/R}) = 1 - 1 \implies e^{-1000/R} + e^{500/R} = 2$.
+Let $y=e^{500/R}$. $y^{-2}+y=2 \implies y^3-2y^2+1=0$. Root $y = \frac{1+\sqrt{5}}{2} \approx 1.618$.
+$500/R = \ln(1.618) = 0.481 \implies R = 1039$. Nearest 100 is $\mathbf{R=1000}$.
+\textit{(ii)} $u(x) = 1-e^{-x/1000}$. CARA utility implies Buy Price = Sell Price.
+Expected Utility of $L_1$ with W=1000: $E[u] = 0.6 u(2000) + 0.4 u(500) = 1 - (0.6e^{-2} + 0.4e^{-0.5}) \approx 0.6762$. (Note: assume $L_1$ shifted to 0.6/0.4 based on text).
+CE: $1-e^{-CE/1000} = 0.6762 \implies e^{-CE/1000} = 0.3238 \implies CE = 1127.6$.
+Buy/Sell Price = $1127.6 - 1000 = \mathbf{\$127.6}$. They are equal due to CARA.
+
+% --------------------------------------------------------------------------------
+
+\subsection*{Q4: Expected Opportunity Loss \& Game Theory}
+\textbf{[Q4a]} A(10\%, 0.7), B(20\%, 0.2), C(30\%, 0.1). $a_1$(-3k, -1k, 0), $a_2$(5k, 1k, -3k). (i) EVPI. (ii) Update with $n=10, r=2$. Accept/Reject?
+\textbf{[Sol 4a]}
+\textit{(i)} $EMV(a_1) = -2300$. $EMV(a_2) = 0.7(5k)+0.2(1k)+0.1(-3k) = \mathbf{3400}$.
+$EPPI = 0.7(5k)+0.2(1k)+0 = 3700$. $EVPI = 3700-3400 = \mathbf{\$300}$.
+\textit{(ii)} $L \propto p^2(1-p)^8$. $J(A) \propto 0.7(0.1^2 \cdot 0.9^8) = 0.003013$. $J(B) = 0.001342$. $J(C) = 0.000519$. Sum = 0.004874.
+$P(A|2)=0.618, P(B|2)=0.275, P(C|2)=0.107$.
+$EMV(a_1) = 0.618(-3k)+0.275(-1k)+0 = -2129$. $EMV(a_2) = 0.618(5k)+0.275(1k)+0.107(-3k) = \mathbf{3044}$. $\implies$ \textbf{Accept ($a_2$)}.
+
+\textbf{[Q4b]} Matrix A and B analysis. (ii) Saddle point params for C.
+\textbf{[Sol 4b]}
+\textit{(i) Matrix A:} Row mins(3,1,3,1) $\to$ Floor=3. Col maxes(4,7,5,7) $\to$ Ceiling=4. No saddle point.
+Domination: Delete R2, R4 (dominated by R3). Delete C2, C4 (dominated by C1). Reduced to $\begin{pmatrix} 4 & 3 \\ 3 & 5 \end{pmatrix}$.
+$p=2/3, q=2/3$. Value = $\mathbf{11/3}$. $P_1(2/3, 0, 1/3, 0), P_2(2/3, 0, 1/3, 0)$.
+\textit{Matrix B:} Row mins(-3,-6,-8,-5) $\to$ Floor=-3. Col maxes(8,6,-3,9) $\to$ Ceiling=-3.
+Floor = Ceiling $\implies$ \textbf{Saddle point at (R1, C3), Value = -3}.
+\textit{(ii) Matrix C:} $\begin{pmatrix} 1 & q & 5 \\ p & 4 & 6 \\ 8 & 1 & 2 \end{pmatrix}$. For (2,2) value 4 to be saddle:
+Row min $\implies 4 \le p$ and $4 \le 6$. Col max $\implies 4 \ge q$ and $4 \ge 1$. $\implies \mathbf{p \ge 4, q \le 4}$.
+
+
+\end{multicols*}
+\end{document}
